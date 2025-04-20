@@ -4,27 +4,32 @@
          (prefix-in : parser-tools/lex-sre))
 
 
-(define-tokens LITERALS (NUMBER ID))
+(define-tokens LITERALS (NUMBER ID LSTRING))
 
-(define-empty-tokens KEYWORDS (IF ELSE RETURN WHILE INT DOUBLE CHAR STRING VOID))
+(define-empty-tokens KEYWORDS (IF ELSE RETURN WHILE))
+(define-empty-tokens TYPES (INT DOUBLE CHAR STRING VOID AUTO))
 (define-empty-tokens RELOPS (LEQ LT GT GEQ EQ NEQ))
+(define-empty-tokens COLS (SEMICOLON COMMA))
 (define-empty-tokens ARITHOPS (ADD SUB MUL DIV))
 (define-empty-tokens BRACKETS (LPAR RPAR LBRACE RBRACE LSQBRACK RSQBRACK))
 (define-empty-tokens OPS (ASSIGN))
 (define-empty-tokens EOF (EOF))
 
-(define bython-lexer
+(define cminus-lexer
   (lexer
     ; Keywords
     ("if" (token-IF))
     ("else" (token-ELSE))
     ("return" (token-RETURN))
     ("while" (token-WHILE))
+
+    ; Types
     ("int" (token-INT))
     ("double" (token-DOUBLE))
     ("char" (token-CHAR))
     ("string" (token-STRING))
     ("void" (token-VOID))
+    ("auto" (token-AUTO))
 
     ; Ops
     ("=" (token-ASSIGN))
@@ -36,6 +41,10 @@
     (">=" (token-GEQ))
     ("==" (token-EQ))
     ("!=" (token-NEQ))
+
+    ; Colons
+    (";" (token-SEMICOLON))
+    ("," (token-COMMA))
 
     ; Arithmetic ops
     ("+" (token-ADD))
@@ -62,15 +71,22 @@
       )
       (token-ID lexeme)
     )
+    (
+      (:: #\"
+          (:* (union (complement "\"") "\\\""))
+          #\"
+      )
+      (token-LSTRING (substring lexeme 1 (- (string-length lexeme) 1)))
+    )
 
-    (whitespace (bython-lexer input-port))
+    (whitespace (cminus-lexer input-port))
     ((eof) (token-EOF))))
 
 (define (lex-this prog-string)
   (let ([l (open-input-string prog-string)])
     (begin
       (lambda ()
-        (bython-lexer l)
+        (cminus-lexer l)
         ))))
 
 (provide (all-defined-out))
@@ -78,7 +94,7 @@
 
 ; tests
 ; TODO: Remove these
-(define bib-lex (lex-this "int main() {x = 10 y = 10 if (x == 10) {return 1}}"))
+(define bib-lex (lex-this "int main() {int x = 10; float y = 10; string bib = \"basbdf\""))
 
 (define (lex-all)
   (define (lex-rec tokens)
