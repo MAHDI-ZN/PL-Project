@@ -1,8 +1,6 @@
 #lang racket
 
-(require parser-tools/lex 
-         (prefix-in : parser-tools/lex-sre))
-
+(require parser-tools/lex (prefix-in : parser-tools/lex-sre))
 
 (define-tokens LITERALS (NUMBER ID LSTRING))
 
@@ -84,7 +82,7 @@
 
 (define (lex-this prog-string)
   (let ([l (open-input-string prog-string)])
-      (lambda () (cminus-lexer l))))
+    (lambda () (cminus-lexer l))))
 
 (provide (all-defined-out))
 
