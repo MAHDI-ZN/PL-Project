@@ -3,140 +3,111 @@
 (require "lexer.rkt")
 (require parser-tools/lex parser-tools/yacc)
 
-(define calc-parser
+(define cminus-parser
   (parser
     (debug "parser-debug.txt")
-    (start Expression)
+    (start PROGRAM)
     (end EOF)
     (error void)
-    (tokens LITERALS OPERATORS PARENTHESES EOF)
+    (tokens LITERALS KEYWORDS TYPES RELOPS COLS ARITHOPS BRACKETS OPS EOF)
     (grammar
       (PROGRAM
-        (DECLARATION-LIST))
-      
+        ((DECLARATION-LIST) (void)))
       (DECLARATION-LIST
-        (DECLARATION-LIST DECLARATION)
-        (DECLARATION))
-      
+        ((DECLARATION-LIST DECLARATION) (void))
+        ((DECLARATION) (void)))
       (DECLARATION
-        (VAR-DECLARATION)
-        (FUN-DECLARATION))
-      
+        ((VAR-DECLARATION) (void))
+        ((FUN-DECLARATION) (void)))
       (VAR-DECLARATION
-        (TYPE-SPECIFIER ID SEMICOLON)
-        (TYPE-SPECIFIER ID LSQBRACK EXPRESSION RSQBRACK SEMICOLON))
-      
+        ((TYPE-SPECIFIER ID SEMICOLON) (void))
+        ((TYPE-SPECIFIER ID LSQBRACK EXPRESSION RSQBRACK SEMICOLON) (void)))
       (TYPE-SPECIFIER
-        (INT)
-        (VOID)
-        (STRING)
-        (DOUBLE)
-        (AUTO)
-        (CHAR))
-      
+        ((INT) (void))
+        ((VOID) (void))
+        ((STRING) (void))
+        ((DOUBLE) (void))
+        ((AUTO) (void))
+        ((CHAR) (void)))
       (FUN-DECLARATION
-        (TYPE-SPECIFIER ID LPAR PARAMS RPAR COMPOUND-STMT))
-      
+        ((TYPE-SPECIFIER ID LPAR PARAMS RPAR COMPOUND-STMT) (void)))
       (PARAMS
-        (PARAM-LIST)
-        (VOID))
-      
+        ((PARAM-LIST) (void))
+        ((VOID) (void)))
       (PARAM-LIST
-        (PARAM-LIST COMMA PARAM)
-        (PARAM))
-      
+        ((PARAM-LIST COMMA PARAM) (void))
+        ((PARAM) (void)))
       (PARAM
-        (TYPE-SPECIFIER ID)
-        (TYPE-SPECIFIER ID LSQBRACK LSQBRACK))
-      
+        ((TYPE-SPECIFIER ID) (void))
+        ((TYPE-SPECIFIER ID LSQBRACK LSQBRACK) (void)))
       (COMPOUND-STMT
-        (LBRACE LOCAL-DECLARATIONS STATEMENT-LIST LBRACE))
-      
+        ((LBRACE LOCAL-DECLARATIONS STATEMENT-LIST LBRACE) (void)))
       (LOCAL-DECLARATIONS
-        (LOCAL-DECLARATIONS VAR-DECLARATIONS)
-        ())
-      
+        ((LOCAL-DECLARATIONS VAR-DECLARATION) (void))
+        (() (void)))
       (STATEMENT-LIST
-        (STATEMENT-LIST STATEMENT)
-        ())
-      
+        ((STATEMENT-LIST STATEMENT) (void))
+        (() (void)))
       (STATEMENT
-        (EXPRESSION-STMT)
-        (COMPOUND-STMT)
-        (SELECTION-STMT)
-        (ITERATION-STMT)
-        (RETURN-STMT))
-      
+        ((EXPRESSION-STMT) (void))
+        ((COMPOUND-STMT) (void))
+        ((SELECTION-STMT) (void))
+        ((ITERATION-STMT) (void))
+        ((RETURN-STMT) (void)))
       (EXPRESSION-STMT
-        (EXPRESSION SEMICOLON)
-        (SEMICOLON))
-      
+        ((EXPRESSION SEMICOLON) (void))
+        ((SEMICOLON) (void)))
       (SELECTION-STMT
-        (IF LPAR EXPRESSION RPAR STATEMENT)
-        (IF LPAR EXPRESSION RPAR STATEMENT ELSE STATEMENT))
-      
+        ((IF LPAR EXPRESSION RPAR STATEMENT) (void))
+        ((IF LPAR EXPRESSION RPAR STATEMENT ELSE STATEMENT) (void)))
       (ITERATION-STMT
-        (WHILE LPAR EXPRESSION RPAR STATEMENT))
-      
+        ((WHILE LPAR EXPRESSION RPAR STATEMENT) (void)))
       (RETURN-STMT
-        (RETURN SEMICOLON)
-        (RETURN EXPRESSION SEMICOLON))
-      
+        ((RETURN SEMICOLON) (void))
+        ((RETURN EXPRESSION SEMICOLON) (void)))
       (EXPRESSION
-        (VAR ASSIGN EXPRESSION)
-        (SIMPLE-EXPRESSION))
-      
+        ((VAR ASSIGN EXPRESSION) (void))
+        ((SIMPLE-EXPRESSION) (void)))
       (VAR
-        (ID)
-        (ID LSQBRACK EXPRESSION RSQBRACK))
-      
+        ((ID) (void))
+        ((ID LSQBRACK EXPRESSION RSQBRACK) (void)))
       (SIMPLE-EXPRESSION
-        (ADDITIVE-EXPRESSION RELOP ADDITIVE-EXPRESSION)
-        (ADDITIVE-EXPRESSION))
-      
+        ((ADDITIVE-EXPRESSION RELOP ADDITIVE-EXPRESSION) (void))
+        ((ADDITIVE-EXPRESSION) (void)))
       (RELOP
-        (LEQ)
-        (LT)
-        (GT)
-        (GEQ)
-        (EQ)
-        (NEQ))
-      
+        ((LEQ) (void))
+        ((LT) (void))
+        ((GT) (void))
+        ((GEQ) (void))
+        ((EQ) (void))
+        ((NEQ) (void)))
       (ADDITIVE-EXPRESSION
-        (ADDITIVE-EXPRESSION ADDOP TERM)
-        (TERM))
-      
+        ((ADDITIVE-EXPRESSION ADDOP TERM) (void))
+        ((TERM) (void)))
       (ADDOP
-        (ADD)
-        (SUB))
-      
+        ((ADD) (void))
+        ((SUB) (void)))
       (TERM
-        (TERM MULOP FACTOR)
-        (FACTOR))
-      
+        ((TERM MULOP FACTOR) (void))
+        ((FACTOR) (void)))
       (MULOP
-        (MUL)
-        (DIV))
-      
+        ((MUL) (void))
+        ((DIV) (void)))
       (FACTOR
-        (LPAR EXPRESSION RPAR)
-        (VAR)
-        (CALL)
-        (NUM))
-      
+        ((LPAR EXPRESSION RPAR) (void))
+        ((VAR) (void))
+        ((CALL) (void))
+        ((NUMBER) (void)))
       (CALL
-        (ID LPAR ARGS RPAR))
-      
+        ((ID LPAR ARGS RPAR) (void)))
       (ARGS
-        (ARG-LIST)
-        ())
-      
+        ((ARG-LIST) (void))
+        (() (void)))
       (ARG-LIST
-        (ARG-LIST COMMA EXPRESSION)
-        (EXPRESSION))
-      )
-    (precs
-      (left ADD SUBTRACT)
-      (left MULTIPLY DIVIDE))))
+        ((ARG-LIST COMMA EXPRESSION) (void))
+        ((EXPRESSION) (void))))))
+
+(define (parse-file path)
+  (cminus-parser (lex-this (string-join (file->lines path)))))
 
 (provide (all-defined-out))
