@@ -84,24 +84,15 @@
 
 (define (lex-this prog-string)
   (let ([l (open-input-string prog-string)])
-    (begin
-      (lambda ()
-        (cminus-lexer l)
-        ))))
+      (lambda () (cminus-lexer l))))
 
 (provide (all-defined-out))
 
-
-; tests
-; TODO: Remove these
-(define bib-lex (lex-this "int main() {int x = 10; float y = 10; string bib = \"basbdf\""))
-
-(define (lex-all)
+(define (lex-all str)
+  (define bib-lex (lex-this str))
   (define (lex-rec tokens)
     (let ([tok (bib-lex)])
       (if (eq? (token-name tok) 'EOF)
           (reverse tokens)
           (lex-rec (cons tok tokens)))))
   (lex-rec '()))
-
-(lex-all)
