@@ -11,6 +11,10 @@
     (error void)
     (tokens LITERALS KEYWORDS TYPES RELOPS COLS ARITHOPS BRACKETS OPS EOF)
     (grammar
+;       (DUMMY
+;         ;((VAR-DECLARATION) (void))
+;         ((STATEMENT) (void)))
+;         ;((EXPRESSION) (void)))
       (PROGRAM
         ((DECLARATION-LIST) (void)))
       (DECLARATION-LIST
@@ -39,9 +43,9 @@
         ((PARAM) (void)))
       (PARAM
         ((TYPE-SPECIFIER ID) (void))
-        ((TYPE-SPECIFIER ID LSQBRACK LSQBRACK) (void)))
+        ((TYPE-SPECIFIER ID LSQBRACK RSQBRACK) (void)))
       (COMPOUND-STMT
-        ((LBRACE LOCAL-DECLARATIONS STATEMENT-LIST LBRACE) (void)))
+        ((LBRACE LOCAL-DECLARATIONS STATEMENT-LIST RBRACE) (void)))
       (LOCAL-DECLARATIONS
         ((LOCAL-DECLARATIONS VAR-DECLARATION) (void))
         (() (void)))
@@ -105,7 +109,8 @@
         (() (void)))
       (ARG-LIST
         ((ARG-LIST COMMA EXPRESSION) (void))
-        ((EXPRESSION) (void))))))
+        ((EXPRESSION) (void)))
+)))
 
 (define (parse-file path)
   (cminus-parser (lex-this (string-join (file->lines path)))))
