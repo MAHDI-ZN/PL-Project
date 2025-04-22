@@ -7,6 +7,7 @@
 (define-empty-tokens KEYWORDS (IF ELSE RETURN WHILE))
 (define-empty-tokens TYPES (INT DOUBLE CHAR STRING VOID AUTO))
 (define-empty-tokens RELOPS (LEQ LT GT GEQ EQ NEQ))
+(define-empty-tokens LOGICOPS (LAND LOR LNOT))
 (define-empty-tokens COLS (SEMICOLON COMMA))
 (define-empty-tokens ARITHOPS (ADD SUB MUL DIV))
 (define-empty-tokens BRACKETS (LPAR RPAR LBRACE RBRACE LSQBRACK RSQBRACK))
@@ -39,6 +40,11 @@
     (">=" (token-GEQ))
     ("==" (token-EQ))
     ("!=" (token-NEQ))
+
+    ; Logical ops
+    ("&&" (token-LAND))
+    ("||" (token-LOR))
+    ("!" (token-LNOT))
 
     ; Colons
     (";" (token-SEMICOLON))

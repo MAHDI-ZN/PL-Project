@@ -9,7 +9,7 @@
     (start PROGRAM)
     (end EOF)
     (error void)
-    (tokens LITERALS KEYWORDS TYPES RELOPS COLS ARITHOPS BRACKETS OPS EOF)
+    (tokens LITERALS KEYWORDS TYPES RELOPS COLS ARITHOPS BRACKETS OPS EOF LOGICOPS)
     (grammar
 ;       (DUMMY
 ;         ;((VAR-DECLARATION) (void))
@@ -77,7 +77,8 @@
         ((ID LSQBRACK EXPRESSION RSQBRACK) (void)))
       (SIMPLE-EXPRESSION
         ((ADDITIVE-EXPRESSION RELOP ADDITIVE-EXPRESSION) (void))
-        ((ADDITIVE-EXPRESSION) (void)))
+        ((ADDITIVE-EXPRESSION) (void))
+        ((LSTRING) (void)))
       (RELOP
         ((LEQ) (void))
         ((LT) (void))
@@ -92,11 +93,18 @@
         ((ADD) (void))
         ((SUB) (void)))
       (TERM
-        ((TERM MULOP FACTOR) (void))
-        ((FACTOR) (void)))
+        ((TERM MULOP NEW-FACTOR) (void))
+        ((NEW-FACTOR) (void)))
       (MULOP
         ((MUL) (void))
         ((DIV) (void)))
+      (NEW-FACTOR
+        ((NEW-FACTOR DUOLOGOP FACTOR) (void))
+        ((LNOT FACTOR) (void))
+        ((FACTOR) (void)))
+      (DUOLOGOP
+        ((LAND) (void))
+        ((LOR) (void)))
       (FACTOR
         ((LPAR EXPRESSION RPAR) (void))
         ((VAR) (void))
