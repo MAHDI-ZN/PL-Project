@@ -1,4 +1,3 @@
-/*===== Sample 9 =====*/
 int func(int n, int m){
 	int c[5];
 	int res;
@@ -10,23 +9,29 @@ int func(int n, int m){
 	c[4] = 7;
 	if ((n + m) < 14) {
 		res = c[1] + c[0];
-		output(res);
+		print(res);
 		if ((n * m) < 50) {
-			for (i=2; i< 5; i=i+1){
+			i = 2;
+			while (i < 5) {
 				res = res + (2 * c[i]);
-				output(res);
+				print(res);
+				i = i + 1;
 			}
 		} else {
-			for (i=2; i< 5; i=i+1){
+			i = 2;
+			while (i < 5) {
 				res = res + c[i];
+				i = i + 1;
 			}
 		}
 	} else {
 		res = c[3] - c[4];
-		output(res);
-		for (i=0; i< 3; i=i+1){
+		print(res);
+		i = 0;
+		while (i < 3) {
 			res = res + (3 * c[i]);
-			output(res);
+			print(res);
+			i = i + 1;
 		}
 	}
 	return res;
@@ -38,5 +43,5 @@ void main(void){
 	int n;
 	m = 5;
 	n = 8;
-	output(func(n, m) + func(n-1, m+4));
+	print(func(n, m) + func(n-1, m+4));
 }

@@ -1,5 +1,3 @@
-/* sample 2 recursive */
-
 int fib(int n) {
     int f;
     if (n < 2) {
@@ -12,6 +10,5 @@ int fib(int n) {
 
 void main(void)
 {
-     output(fib(3));
+     print(fib(3));
 }
-

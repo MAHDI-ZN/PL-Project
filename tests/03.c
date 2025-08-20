@@ -1,10 +1,10 @@
-/* sample 3 recursive */
-
 int count;
 int result[50];
 
 
 int f(int a, int result[]) {
+	int count;
+	count = 0;
 	count = count + 1;
 	if(result[a - 1]){
 		return result[a - 1];
@@ -26,11 +26,13 @@ int f(int a, int result[]) {
 
 void main (void) {
 	int i;
-	for (i = 0; i < 50; i = i + 1){
+	int count;
+	while (i<50){
 		result[i] = 0;
+		i = i + 1;
 	}
 	count = 0;
-	output(f(40, result));
-	output(count);
+	print(f(40, result));
+	print(count);
 }
 

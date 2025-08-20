@@ -1,4 +1,3 @@
-/*===== Sample 7 =====*/
 int ff(int a[], int b){
 	int res;
 	res = a[0] + a[1];
@@ -9,7 +8,7 @@ int ff(int a[], int b){
 int gg(int x){
 	int a;
 	a = 10;
-	output(x);
+	print(x);
 	if(a < x)
 		return(0-1);
 	if (x < a)
@@ -24,12 +23,15 @@ void main(void){
 	b = 4;
 	i = 0;
 	y = 5;
-        for (i=0; i< 5; i=i+1){
+        i=0;
+while (i< 5) {
+    i=i+1;
+
 		a[i] = 1;
 	}
 	a[1] = 5;
 	
-	output(ff(a, b));
-	output(gg(y));
-	output(ff(a, y) * gg(b));
+	print(ff(a, b));
+	print(gg(y));
+	print(ff(a, y) * gg(b));
 }

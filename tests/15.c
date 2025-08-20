@@ -1,9 +1,11 @@
-/*===  Sample 4  === */
 void printArray(int A[], int size)
 {
     int i;
-    for (i=0; i<size; i=i+1){
-        output(A[i]);
+    i=0;
+while (i<size) {
+    i=i+1;
+
+        print(A[i]);
     }
 }
 
@@ -14,9 +16,15 @@ void main(void)
     int i;
     int j;
     arrsize = 10;
-    for (i=0; i< arrsize; i=i+1){
-        arr[i] = -2;
-        for (j=0; j< i; j=j+1){
+    i=0;
+while (i< arrsize) {
+    i=i+1;
+
+        arr[i] = 2;
+        j=0;
+while (j< i) {
+    j=j+1;
+
             arr[i] = arr[i] * (0-2);
         }
     }

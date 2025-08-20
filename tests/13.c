@@ -1,8 +1,7 @@
-/*==== Sample 2 =====*/
 int foo(int x){
 	int a;
 	a = 15;
-	output(x);
+	print(x);
 	if(a < x + 3){
 		return(0-1);
 	}
@@ -18,15 +17,15 @@ void main ( void )
 
 	int i;
 	i = foo (8) ;
-	output (i);
+	print (i);
 
 	a = 7;
     b = 2;
     c = a + b;
     if(c < 8){
-    output(b - a);
+    print(b - a);
     } else {
-    output(c * 4);
+    print(c * 4);
     }
 
 }

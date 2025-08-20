@@ -1,4 +1,3 @@
-/*=== Sample 5 == */
 int abs(int a) {
     if (a < 0) {
         return 0-a;
@@ -36,7 +35,10 @@ int isMultiplier(int a, int b) {
     step = i;
     i = i - abs(i);
     if (abs(i) < abs(a) + 1) {
-        for (i=0; abs(i) < abs(a) + 1; i = i + step) {
+        i=0;
+while (abs(i) < abs(a) + 1) {
+    i = i + step;
+
             if (i * b == a) {
                 flag = 1;
                 break;
@@ -52,9 +54,15 @@ void main(void) {
     int i;
     int j;
     int sum;
-    for (i = 1; i < 11; i = i + 1) {
+    i = 1;
+while (i < 11) {
+    i = i + 1;
+
         sum = 0;
-        for (j = 1; j < i + 1; j = j + 1) {
+        j = 1;
+while (j < i + 1) {
+    j = j + 1;
+
             if (isMultiplier(j, 2)) {
                 sum = sum + 0;
             } else {
@@ -62,7 +70,7 @@ void main(void) {
             }
         }
         if (isMultiplier(j, 2)) {
-            output(sum);
+            print(sum);
         } else {
             j = 0;
         }

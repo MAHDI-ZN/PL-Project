@@ -1,5 +1,3 @@
-/*==== sample 6  ====*/
-
 int a;
 int b;
 
@@ -8,11 +6,11 @@ void main(void) {
     int d;
     a = c = 100;
     d = b = 400;
-    output(a);
-    output(b);
+    print(a);
+    print(b);
     c = a * 17 < 15 + 3;
-    output(c);
-    output(d < 500);
-    output(d - 8 < 392);
-    output(4 * 2);
+    print(c);
+    print(d < 500);
+    print(d - 8 < 392);
+    print(4 * 2);
 }

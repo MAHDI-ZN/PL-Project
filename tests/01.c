@@ -5,7 +5,7 @@ int func(int a){
 	} else {
 		result = func(a - 2) + (a + 1);
 	}
-	output(result);
+	print(result);
 	return result;
 }
 

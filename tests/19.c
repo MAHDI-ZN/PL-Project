@@ -1,10 +1,11 @@
-/*===== Sample 8 =====*/
 int sum(int b[], int arrsize){
 	int s;
 	int i;
 	s = 0;
-        for (i=0; i< arrsize; i=i+1){
+	i = 0;
+	while (i < arrsize) {
 		s = s + b[i];
+		i = i + 1;
 	}
 	return s;
 }
@@ -16,11 +17,13 @@ int fib(int n){
 	int res;
 	fib1 = 1;
 	fib2 = 2;
-        for (j=0; j< (n+1); j=j+1){
+	j = 0;
+	while (j < (n + 1)) {
 		res = fib1 + fib2;
-		output(res);
+		print(res);
 		fib1 = fib2;
 		fib2 = res;
+		j = j + 1;
 	}
 	return res;
 }
@@ -28,9 +31,11 @@ int fib(int n){
 void main(void){
 	int a[9];
 	int j;
-        for (j=0; j< 9; j=j+1){
+	j = 0;
+	while (j < 9) {
 		a[j] = j + 1;
+		j = j + 1;
 	}
-	output(sum(a,9));
-	output(fib(3));
+	print(sum(a,9));
+	print(fib(3));
 }

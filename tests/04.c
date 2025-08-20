@@ -1,22 +1,21 @@
-/* sample 4 recursive */
 int i;
 
 int rec(int a, int b){
 	int res;
 	if (a < 3){
 		res = 1;
-		output(res);
+		print(res);
 	} else {
 		if (15 < b) {
 			res = a;
-			output(res);
+			print(res);
 		} else {
 			res = rec(a - 1, b + 1) * (a - 2);
 		} 
 	} 
 
 	if (a < 6){
-		output(res);
+		print(res);
 	} else{
 		i = i + 1;
 	} 
@@ -29,6 +28,6 @@ void main (void) {
 	i = 0;
 	x = 7;
 	y = 13;
-	output(rec(x, y));
-	output(i);
+	print(rec(x, y));
+	print(i);
 }
