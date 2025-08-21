@@ -31,14 +31,34 @@
     [else
      (error 'runtime-error "Undefined variable: ~a" name)]))
 
+;; ---- Type-aware define & set ----
+
+;; A unique sentinel for uninitialized 'auto' variables
+(define UNINIT (gensym 'uninit))
+
+;; (value . type)
 (define (env-define! env name value type)
   (hash-set! (environment-bindings env) name (cons value type)))
 
+;; Strict, with 'auto' adoption-on-first-assignment
 (define (env-set! env name value)
   (cond
     [(hash-has-key? (environment-bindings env) name)
-     (let ([old-binding (hash-ref (environment-bindings env) name)])
-       (hash-set! (environment-bindings env) name (cons value (cdr old-binding))))]
+     (let* ([old-binding (hash-ref (environment-bindings env) name)]
+            [old-val (car old-binding)]
+            [old-ty  (cdr old-binding)]
+            [new-ty  (infer-type value)])
+       (cond
+         [(eq? old-ty 'auto)
+          ;; If first time (UNINIT), adopt type; otherwise enforce same type
+          (if (eq? old-val UNINIT)
+              (hash-set! (environment-bindings env) name (cons value new-ty))
+              (begin
+                (check-type old-ty new-ty (format "assignment to ~a" name))
+                (hash-set! (environment-bindings env) name (cons value old-ty))))]
+         [else
+          (check-type old-ty new-ty (format "assignment to ~a" name))
+          (hash-set! (environment-bindings env) name (cons value old-ty))]))]
     [(environment-parent env)
      (env-set! (environment-parent env) name value)]
     [else
@@ -49,17 +69,17 @@
 ;; =============================================================================
 
 (define (type-compatible? expected actual)
-  (or (eq? expected actual)
-      (eq? expected 'auto)
-      (eq? actual 'auto)))
+  ;; strict, except 'auto' acts as a type-variable during adoption only
+  (eq? expected actual))
 
 (define (infer-type value)
   (cond
+    [(eq? value UNINIT) 'auto] ; internal sentinel (only for decl state)
     [(integer? value) 'int]
     [(real? value) 'double]
     [(string? value) 'string]
     [(char? value) 'char]
-    [(boolean? value) 'int] ; C-style: booleans are integers
+    [(boolean? value) 'int] ; C-style: booleans behave as ints at runtime
     [(array-value? value) (array-value-type value)]
     [else 'void]))
 
@@ -79,7 +99,8 @@
     ;; Add built-in functions
     (add-builtins! global-env)
     ;; Process declarations
-    (for-each (lambda (decl) (eval-declaration decl global-env)) (program-declarations prog))
+    (for-each (lambda (decl) (eval-declaration decl global-env))
+              (program-declarations prog))
     ;; Look for main function and call it
     (let ([main-func (env-lookup global-env 'main)])
       (if main-func
@@ -108,6 +129,7 @@
            ;; Array declaration
            (let* ([size-val (eval-expression size env)]
                   [arr (array-value (make-vector size-val 0) type)])
+             ;; If array type is 'auto', keep it as 'auto' until first element assignment.
              (env-define! env id arr type))
            ;; Simple variable declaration
            (env-define! env id (default-value type) type)))]
@@ -121,6 +143,7 @@
 
 (define (default-value type)
   (case type
+    [(auto) UNINIT]          ; important: 'auto' starts uninitialized
     [(int) 0]
     [(double) 0.0]
     [(string) ""]
@@ -162,6 +185,7 @@
                     0)])
        (raise (return-exception val)))]))
 
+;; ---- Lazy evaluation for &&, ||, and now * ----
 (define (eval-expression expr env)
   (cond
     [(literal? expr)
@@ -179,7 +203,9 @@
                  (error 'runtime-error "Array index out of bounds"))
                (vector-ref (array-value-elements value) index))
              ;; Simple variable access
-             value)))]
+             (if (eq? value UNINIT)
+                 (error 'runtime-error "Use of uninitialized variable: ~a" (var-expr-id expr))
+                 value))))]
     
     [(assign-expr? expr)
      (let* ([rval (eval-expression (assign-expr-expr expr) env)]
@@ -188,12 +214,22 @@
            ;; Array assignment
            (let* ([binding (env-lookup env (var-expr-id var))]
                   [array (car binding)]
-                  [index (eval-expression (var-expr-index var) env)])
+                  [index (eval-expression (var-expr-index var) env)]
+                  [elem-ty (infer-type rval)])
              (unless (array-value? array)
                (error 'type-error "Cannot index non-array variable"))
              (unless (and (integer? index) (>= index 0) (< index (vector-length (array-value-elements array))))
                (error 'runtime-error "Array index out of bounds"))
-             (vector-set! (array-value-elements array) index rval)
+             ;; If array declared 'auto', adopt type on first element assignment.
+             (cond
+               [(eq? (array-value-type array) 'auto)
+                (define new-arr (array-value (array-value-elements array) elem-ty))
+                ;; Update array type in env, then write element
+                (env-set! env (var-expr-id var) new-arr)
+                (vector-set! (array-value-elements new-arr) index rval)]
+               [else
+                (check-type (array-value-type array) elem-ty "array element assignment")
+                (vector-set! (array-value-elements array) index rval)])
              rval)
            ;; Simple assignment
            (begin
@@ -201,25 +237,50 @@
              rval)))]
     
     [(binary-expr? expr)
-     (eval-binary-op (binary-expr-op expr) 
-                     (eval-expression (binary-expr-left expr) env)
-                     (eval-expression (binary-expr-right expr) env))]
+     (define op (binary-expr-op expr))
+     (cond
+       ;; Lazy && : if left is falsy, don't eval right
+       [(eq? op '&&)
+        (let ([lv (eval-expression (binary-expr-left expr) env)])
+          (if (truthy? lv)
+              (let ([rv (eval-expression (binary-expr-right expr) env)])
+                (if (and (truthy? lv) (truthy? rv)) 1 0))
+              0))]
+       ;; Lazy || : if left is truthy, don't eval right
+       [(eq? op '||)
+        (let ([lv (eval-expression (binary-expr-left expr) env)])
+          (if (truthy? lv)
+              1
+              (let ([rv (eval-expression (binary-expr-right expr) env)])
+                (if (or (truthy? lv) (truthy? rv)) 1 0))))]
+       ;; NEW: Lazy * : if left is 0, don't eval right
+       [(eq? op '*)
+        (let ([lv (eval-expression (binary-expr-left expr) env)])
+          (if (and (number? lv) (zero? lv))
+              0
+              (let ([rv (eval-expression (binary-expr-right expr) env)])
+                (* lv rv))))]
+       [else
+        ;; Eager for all other binary ops (numeric & relational)
+        (eval-binary-op op 
+                        (eval-expression (binary-expr-left expr) env)
+                        (eval-expression (binary-expr-right expr) env))])]
     
     [(unary-expr? expr)
      (eval-unary-op (unary-expr-op expr)
                     (eval-expression (unary-expr-expr expr) env))]
     
     [(call-expr? expr)
-    (let ([func-binding (env-lookup env (string->symbol (call-expr-id expr)))])
-      (let ([func (car func-binding)]
-            [args (call-expr-args expr)])
-        (call-function func args env)))]))
+     (let ([func-binding (env-lookup env (string->symbol (call-expr-id expr)))])
+       (let ([func (car func-binding)]
+             [args (call-expr-args expr)])
+         (call-function func args env)))]))
 
 (define (eval-binary-op op left right)
   (case op
     [(+) (+ left right)]
     [(-) (- left right)]
-    [(*) (* left right)]
+    ;; (*) handled lazily above; this path used for other ops
     [(/) (if (= right 0)
              (error 'runtime-error "Division by zero")
              (/ left right))]
@@ -229,8 +290,6 @@
     [(>=) (if (>= left right) 1 0)]
     [(==) (if (equal? left right) 1 0)]
     [(!=) (if (not (equal? left right)) 1 0)]
-    [(&&) (if (and (truthy? left) (truthy? right)) 1 0)]
-    [(||) (if (or (truthy? left) (truthy? right)) 1 0)]
     [else (error 'runtime-error "Unknown binary operator: ~a" op)]))
 
 (define (eval-unary-op op operand)
@@ -242,6 +301,7 @@
 (define (truthy? val)
   (not (or (eq? val 0) (eq? val #f))))
 
+;; ---- Function calls enforce/learn types for params ----
 (define (call-function func args env)
   (cond
     [(procedure? func)
@@ -260,11 +320,19 @@
          (error 'runtime-error "Function arity mismatch: expected ~a args, got ~a" 
                 (length params) (length args)))
        
-       ;; Bind parameters
-       (for-each (lambda (param arg)
-                   (let ([arg-val (eval-expression arg env)])
-                     (env-define! func-env (param-id param) arg-val (param-type param))))
-                 params args)
+       ;; Bind parameters with strict typing / auto-adoption
+       (for-each
+        (lambda (param arg)
+          (let* ([pv (param-type param)]
+                 [arg-val (eval-expression arg env)]
+                 [arg-ty (infer-type arg-val)])
+            (cond
+              [(eq? pv 'auto)
+               (env-define! func-env (param-id param) arg-val arg-ty)]
+              [else
+               (check-type pv arg-ty (format "argument for parameter ~a" (param-id param)))
+               (env-define! func-env (param-id param) arg-val pv)])))
+        params args)
        
        ;; Execute function body
        (with-handlers ([return-exception? (lambda (e) (return-exception-value e))])
