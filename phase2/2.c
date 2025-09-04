@@ -58,7 +58,6 @@ int func(int b10[], int b10s, string b2[], int b2s) {
   idx=0;
   while(idx < b10s) {
     if(isinlist(b10[idx], b2, b2s) == 1) {
-      print(b10[idx]);
       if(rem(b10[idx], 2) == 1) {
         odds = odds * b10[idx];
       } else {
