@@ -127,8 +127,17 @@
                    (unless (and num (integer? num))
                      (error 'runtime-error "parseint: string does not represent an integer"))
                    (exact-truncate num)))
-               'int))
+               'int)
 
+  (env-define! env 'strlen
+               (lambda (args env)
+                 (unless (= (length args) 1)
+                   (error 'runtime-error "strlen expects exactly one argument"))
+                 (let ([arg (eval-expression (car args) env)])
+                   (unless (string? arg)
+                     (error 'runtime-error "strlen: argument must be a string"))
+                   (string-length arg)))
+               'int))
 
 (define (eval-declaration decl env)
   (cond
