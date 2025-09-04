@@ -117,7 +117,18 @@
                           args)
                  (newline)
                  0)
-               'void))
+               'void)
+  (env-define! env 'parseint 
+               (lambda (args env)
+                 (unless (= (length args) 1)
+                   (error 'runtime-error "parseint expects exactly one argument"))
+                 (let* ([arg (eval-expression (car args) env)]
+                        [num (string->number arg)])
+                   (unless (and num (integer? num))
+                     (error 'runtime-error "parseint: string does not represent an integer"))
+                   (exact-truncate num)))
+               'int))
+
 
 (define (eval-declaration decl env)
   (cond

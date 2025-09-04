@@ -76,10 +76,7 @@
       (token-ID lexeme)
     )
     (
-      (:: #\"
-          (:* (union (complement "\"") "\\\""))
-          #\"
-      )
+      (:: #\" (:* (:or "_" (char-range "a" "z") (char-range "A" "Z") (char-range #\0 #\9))) #\")
       (token-LSTRING (substring lexeme 1 (- (string-length lexeme) 1)))
     )
 
