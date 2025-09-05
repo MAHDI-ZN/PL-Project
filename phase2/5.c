@@ -61,13 +61,13 @@ string findBest(int year) {
   string bestStu;
   int idx;
 
-  bestScore = 0.0000000000001;
+  bestScore = 0.0;
   bestStu = "";
   idx = 0;
 
   while (idx < size) {
     if (year == div(parseint(num[idx]), 1000000)) {
-      tempScore = findMenteeMean(0, 0.00000000000000001, mentee[idx]);
+      tempScore = findMenteeMean(0, 0.0, mentee[idx]);
       if (tempScore > bestScore) {
         bestScore = tempScore;
         bestStu = num[idx];
@@ -109,7 +109,7 @@ void main(void) {
   num[2] = "400222222";
   first[2] = "person2";
   last[2] = "test2";
-  score[2] = 19.00000000001;
+  score[2] = 19.00;
   mentee[2] = "402222222";
 
   num[3] = "401111111";

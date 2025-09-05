@@ -34,5 +34,7 @@ int func(int a) {
 }
 
 void main(void) {
-    print(func(123));
+    int input;
+    input = 123450;
+    print(func(input));
 }
