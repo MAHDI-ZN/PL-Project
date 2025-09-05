@@ -153,7 +153,12 @@
         ((LPAR EXPRESSION RPAR) $2)
         ((VAR) $1)
         ((CALL) $1)
-        ((NUMBER) (literal $1 (if (exact-integer? $1) 'int 'double))))
+        ((NUMBER) (literal $1 (cond
+                          [(exact-integer? $1) 'int]
+                          [(and (real? $1) (not (exact-integer? $1))) 'double]
+                          [else 'int])))
+        ((SUB FACTOR) (unary-expr '- $2))
+        ((ADD FACTOR) $2))
       
       (CALL
         ((ID LPAR ARGS RPAR) (call-expr $1 $3)))

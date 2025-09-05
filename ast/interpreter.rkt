@@ -74,12 +74,11 @@
 
 (define (infer-type value)
   (cond
-    [(eq? value UNINIT) 'auto] ; internal sentinel (only for decl state)
-    [(integer? value) 'int]
-    [(real? value) 'double]
+    [(exact-integer? value) 'int]           ; Only exact integers are 'int
+    [(real? value) 'double]                 ; All other reals are 'double
     [(string? value) 'string]
     [(char? value) 'char]
-    [(boolean? value) 'int] ; C-style: booleans behave as ints at runtime
+    [(boolean? value) 'int] ; C-style: booleans are integers
     [(array-value? value) (array-value-type value)]
     [else 'void]))
 
